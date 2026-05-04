@@ -9,34 +9,34 @@ public class GameUI {
     private GachaService gachaService;
     private BattleService battleService;
     private Scanner scanner;
-    
+
     public GameUI() {
         this.scanner = new Scanner(System.in);
         initGame();
     }
-    
+
     private void initGame() {
         System.out.println("========================================");
-        System.out.println("      ✨ 欢迎来到抽卡闯关世界 ✨");
+        System.out.println("      ✨ Welcome to Gacha Battle! ✨");
         System.out.println("========================================");
-        System.out.print("请输入你的名字: ");
+        System.out.print("Enter your name: ");
         String name = scanner.nextLine();
-        
+
         this.player = new Player(name);
         this.gachaService = new GachaService();
         this.battleService = new BattleService(player);
-        
-        System.out.println("\n🎁 新手礼包：赠送1次免费抽卡！");
-        System.out.println("按回车键开始抽卡...");
+
+        System.out.println("\n🎁 Newbie gift: 1 free draw!");
+        System.out.println("Press Enter to draw...");
         scanner.nextLine();
         gachaService.pull(player);
     }
-    
+
     public void start() {
         while (true) {
             showMainMenu();
-            int choice = getIntInput("请选择: ");
-            
+            int choice = getIntInput("Choose: ");
+
             switch (choice) {
                 case 1:
                     showGachaMenu();
@@ -45,43 +45,43 @@ public class GameUI {
                     player.showInventory();
                     break;
                 case 3:
-                    startBattle();
+                    selectStageAndBattle();
                     break;
                 case 4:
                     showPlayerStatus();
                     break;
                 case 0:
-                    System.out.println("👋 感谢游玩，再见！");
+                    System.out.println("👋 Thanks for playing! Goodbye.");
                     return;
                 default:
-                    System.out.println("❌ 无效选择，请重新输入！");
+                    System.out.println("❌ Invalid choice, try again.");
             }
         }
     }
-    
+
     private void showMainMenu() {
         System.out.println("\n========================================");
-        System.out.println("         【主菜单】");
+        System.out.println("           【 MAIN MENU 】");
         System.out.println("========================================");
-        System.out.println("💰 当前游戏币: " + player.getCoins());
-        System.out.println("📊 当前关卡: 第 " + player.getCurrentStage() + " 关");
-        System.out.println("📦 背包卡片数: " + player.getInventorySize());
+        System.out.println("💰 Coins: " + player.getCoins());
+        System.out.println("📊 Current stage: " + player.getMaxUnlockedStage() + " (unlocked)");
+        System.out.println("📦 Cards in inventory: " + player.getInventorySize());
         System.out.println("========================================");
-        System.out.println("1. 🎲 抽卡");
-        System.out.println("2. 📦 查看背包");
-        System.out.println("3. ⚔️ 闯关战斗");
-        System.out.println("4. ℹ️ 查看状态");
-        System.out.println("0. 🚪 退出游戏");
+        System.out.println("1. 🎲 Draw cards");
+        System.out.println("2. 📦 View inventory");
+        System.out.println("3. ⚔️ Battle");
+        System.out.println("4. ℹ️ Player status");
+        System.out.println("0. 🚪 Exit game");
         System.out.println("========================================");
     }
-    
+
     private void showGachaMenu() {
-        System.out.println("\n========== 抽卡系统 ==========");
-        System.out.println("1. 单抽 (" + gachaService.getCostPerPull() + " 游戏币)");
-        System.out.println("2. 十连抽 (" + (gachaService.getCostPerPull() * 10) + " 游戏币)");
-        System.out.println("0. 返回主菜单");
-        System.out.print("请选择: ");
-        
+        System.out.println("\n========== DRAW MENU ==========");
+        System.out.println("1. Single draw (" + gachaService.getCostPerPull() + " coins)");
+        System.out.println("2. 10x draw (" + (gachaService.getCostPerPull() * 10) + " coins)");
+        System.out.println("0. Back to main menu");
+        System.out.print("Choose: ");
+
         int choice = getIntInput("");
         switch (choice) {
             case 1:
@@ -93,63 +93,80 @@ public class GameUI {
             case 0:
                 return;
             default:
-                System.out.println("无效选择！");
+                System.out.println("Invalid choice!");
         }
-        
-        System.out.println("\n按回车键继续...");
+
+        System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
         scanner.nextLine();
     }
-    
-    private void startBattle() {
+
+    private void selectStageAndBattle() {
         if (player.getInventorySize() == 0) {
-            System.out.println("⚠️ 背包空空如也，无法战斗！先去抽卡吧！");
+            System.out.println("⚠️ Inventory empty! Draw some cards first.");
             return;
         }
-        
-        boolean result = battleService.startBattle();
-        if (result && player.getCurrentStage() > 5) {
-            System.out.println("\n🎊🎊🎊 恭喜通关！游戏通关！ 🎊🎊🎊");
-            System.out.println("感谢你的游玩！");
-            System.exit(0);
+
+        System.out.println("\n========== SELECT STAGE ==========");
+        for (int i = 1; i <= Player.getTotalStages(); i++) {
+            String status;
+            if (i > player.getMaxUnlockedStage()) {
+                status = "🔒 locked";
+            } else if (player.isFirstClear(i)) {
+                status = "🔄 repeatable (half reward)";
+            } else {
+                status = "🎁 first clear (full reward)";
+            }
+            System.out.printf("%d. Stage %d - %s%n", i, i, status);
         }
-        
-        System.out.println("\n按回车键继续...");
+        System.out.println("0. Back to main menu");
+        System.out.print("Choose stage: ");
+
+        int choice = getIntInput("");
+        if (choice >= 1 && choice <= Player.getTotalStages()) {
+            battleService.startBattle(choice);
+        } else if (choice != 0) {
+            System.out.println("Invalid choice!");
+        }
+
+        System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
         scanner.nextLine();
     }
-    
+
     private void showPlayerStatus() {
-        System.out.println("\n========== 玩家状态 ==========");
-        System.out.println("👤 玩家: " + player.getName());
-        System.out.println("💰 游戏币: " + player.getCoins());
-        System.out.println("📊 当前关卡: 第 " + player.getCurrentStage() + " 关");
-        System.out.println("📦 卡片数量: " + player.getInventorySize());
-        
-        // 统计各等级卡片数量
+        System.out.println("\n========== PLAYER STATUS ==========");
+        System.out.println("👤 Name: " + player.getName());
+        System.out.println("💰 Coins: " + player.getCoins());
+        System.out.println("🔓 Unlocked stages: 1 - " + player.getMaxUnlockedStage());
+        System.out.println("📦 Cards owned: " + player.getInventorySize());
+
         long sCount = player.getTeam().stream().filter(c -> c.getRank().equals("S")).count();
         long aCount = player.getTeam().stream().filter(c -> c.getRank().equals("A")).count();
         long bCount = player.getTeam().stream().filter(c -> c.getRank().equals("B")).count();
-        
-        System.out.println("\n卡片统计:");
-        System.out.println("  S级: " + sCount + " 张");
-        System.out.println("  A级: " + aCount + " 张");
-        System.out.println("  B级: " + bCount + " 张");
-        System.out.println("=============================");
-        
-        System.out.println("\n按回车键继续...");
+        System.out.println("\nCard count by rank:");
+        System.out.println("  S-rank: " + sCount);
+        System.out.println("  A-rank: " + aCount);
+        System.out.println("  B-rank: " + bCount);
+
+        System.out.println("\n🎯 Pity progress:");
+        System.out.println("  A-pity: " + gachaService.getAPityProgress() + "/10");
+        System.out.println("  S-pity: " + gachaService.getSPityProgress() + "/80");
+        System.out.println("===================================");
+
+        System.out.println("\nPress Enter to continue...");
         scanner.nextLine();
         scanner.nextLine();
     }
-    
+
     private int getIntInput(String prompt) {
         System.out.print(prompt);
         while (!scanner.hasNextInt()) {
-            System.out.print("请输入数字: ");
+            System.out.print("Please enter a number: ");
             scanner.next();
         }
         int result = scanner.nextInt();
-        scanner.nextLine();  // 清除换行符
+        scanner.nextLine();
         return result;
     }
 }
