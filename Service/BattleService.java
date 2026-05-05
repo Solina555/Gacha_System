@@ -3,10 +3,14 @@ package Service;
 import Model.*;
 import java.util.*;
 
+/**
+ * Handles stage battles, enemy configuration, turn-based combat, and rewards.
+ */
 public class BattleService {
     private Player player;
     private Random random;
 
+    // Stage definitions: name, rank, attack, defense, HP
     private static final EnemyConfig[] STAGES = {
         new EnemyConfig("Goblin Chief", "B", 35, 20, 80),
         new EnemyConfig("Shadow Assassin", "B", 45, 15, 100),
@@ -20,13 +24,18 @@ public class BattleService {
         this.random = new Random();
     }
 
+    /**
+     * Starts a battle for the given stage.
+     * @param stage Stage number (1-5)
+     * @return true if player wins, false otherwise
+     */
     public boolean startBattle(int stage) {
         if (stage < 1 || stage > Player.getTotalStages()) {
-            System.out.println("❌ Invalid stage number!");
+            System.out.println("[X] Invalid stage number!");
             return false;
         }
         if (stage > player.getMaxUnlockedStage()) {
-            System.out.println("⚠️ Stage " + stage + " is not unlocked yet! Clear previous stages first.");
+            System.out.println("[WARN] Stage " + stage + " is not unlocked yet! Clear previous stages first.");
             return false;
         }
 
@@ -34,18 +43,18 @@ public class BattleService {
         Enemy enemy = new Enemy(config);
 
         boolean isFirst = !player.isFirstClear(stage);
-        System.out.println("\n⚔️⚔️⚔️ STAGE " + stage + " ⚔️⚔️⚔️");
+        System.out.println("\n=== STAGE " + stage + " ===");
         System.out.println("Enemy: " + enemy);
         if (isFirst) {
-            System.out.println("🎁 First clear reward: " + Player.getFullReward(stage) + " coins");
+            System.out.println("[FIRST] First clear reward: " + Player.getFullReward(stage) + " coins");
         } else {
-            System.out.println("🔄 Repeat clear reward: " + Player.getHalfReward(stage) + " coins (half of first clear)");
+            System.out.println("[REPEAT] Repeat clear reward: " + Player.getHalfReward(stage) + " coins (half of first clear)");
         }
         System.out.println("---------------------------------------------");
 
         List<Card> team = player.getTeam();
         if (team.isEmpty()) {
-            System.out.println("⚠️ No cards to fight! Go draw some first.");
+            System.out.println("[WARN] No cards to fight! Go set a team first.");
             return false;
         }
 
@@ -54,20 +63,26 @@ public class BattleService {
         if (victory) {
             int reward = isFirst ? Player.getFullReward(stage) : Player.getHalfReward(stage);
             player.addCoins(reward);
-            System.out.println("💰 You received " + reward + " coins!");
+            System.out.println("[COIN] You received " + reward + " coins!");
 
             if (isFirst) {
                 player.setFirstClear(stage);
                 player.unlockNextStage(stage);
-                System.out.println("🎉 First clear! Repeating this stage will give half reward.");
+                System.out.println("[FIRST] First clear! Repeating this stage will give half reward.");
             } else {
-                System.out.println("🔄 Stage cleared again. Half reward granted.");
+                System.out.println("[REPEAT] Stage cleared again. Half reward granted.");
             }
         }
 
         return victory;
     }
 
+    /**
+     * Main turn-based battle loop.
+     * @param team Player's current team (list is modified as cards die)
+     * @param enemy Enemy instance
+     * @return true if player wins, false if all cards are defeated
+     */
     private boolean battleLoop(List<Card> team, Enemy enemy) {
         Scanner scanner = new Scanner(System.in);
         int currentCardIndex = 0;
@@ -101,26 +116,37 @@ public class BattleService {
                     continue;
             }
 
+            // Show status after player's action
+            displayBattleStatus(team, enemy);
+
             if (enemy.isAlive()) {
                 enemyAttack(team, enemy);
+                // Show status after enemy's action
+                displayBattleStatus(team, enemy);
                 team.removeIf(card -> !card.isAlive());
                 if (team.isEmpty()) {
-                    System.out.println("\n💀 All cards defeated! You lose... 💀");
+                    System.out.println("\n[DEFEAT] All cards defeated! You lose...");
                     return false;
                 }
             }
         }
 
-        System.out.println("\n🎉 Victory! You defeated " + enemy.getName() + "! 🎉");
+        System.out.println("\n[VICTORY] You defeated " + enemy.getName() + "!");
         return true;
     }
 
+    /**
+     * Player's normal attack.
+     */
     private void playerAttack(Card card, Enemy enemy) {
         int damage = card.getAttack();
         System.out.println("\n" + card.getName() + " attacks!");
         enemy.takeDamage(damage);
     }
 
+    /**
+     * Player's special skill with rank-based multiplier.
+     */
     private void useSpecialSkill(Card card, Enemy enemy) {
         card.useSpecialSkill();
         double multiplier;
@@ -134,11 +160,35 @@ public class BattleService {
         enemy.takeDamage(damage);
     }
 
+    /**
+     * Enemy attacks a random target in the player's team.
+     */
     private void enemyAttack(List<Card> team, Enemy enemy) {
         Card target = team.get(random.nextInt(team.size()));
         System.out.println("\n" + enemy.getName() + " attacks " + target.getName() + "!");
         target.takeDamage(enemy.getAttack());
     }
+
+    /**
+     * Prints current HP status of all player's cards and the enemy.
+     */
+    private void displayBattleStatus(List<Card> team, Enemy enemy) {
+        System.out.println("\n===== BATTLE STATUS =====");
+        System.out.print("Your team: ");
+        if (team.isEmpty()) {
+            System.out.print("(no cards alive)");
+        } else {
+            for (int i = 0; i < team.size(); i++) {
+                Card c = team.get(i);
+                System.out.print(c.getName() + " [HP:" + c.getHp() + "/" + c.getMaxHp() + "]");
+                if (i < team.size() - 1) System.out.print(", ");
+            }
+        }
+        System.out.println("\nEnemy: " + enemy.getName() + " [HP:" + enemy.getHp() + "/" + enemy.getMaxHp() + "]");
+        System.out.println("========================");
+    }
+
+    // ------------------------- Inner classes for enemy data -------------------------
 
     private static class EnemyConfig {
         String name;
@@ -182,6 +232,8 @@ public class BattleService {
         boolean isAlive() { return hp > 0; }
         int getAttack() { return attack; }
         String getName() { return name; }
+        int getHp() { return hp; }
+        int getMaxHp() { return maxHp; }
         String getStatus() { return name + " [HP:" + hp + "/" + maxHp + "]"; }
 
         @Override

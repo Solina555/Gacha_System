@@ -1,5 +1,8 @@
 package Model;
 
+/**
+ * S-rank card with bonus stats and 2.0x special skill multiplier.
+ */
 public class SCard extends Card {
     private static final int BONUS_ATTACK = 50;
     private static final int BONUS_DEFENSE = 30;
@@ -14,6 +17,6 @@ public class SCard extends Card {
 
     @Override
     public void useSpecialSkill() {
-        System.out.println("✨ " + getName() + " uses S-rank skill: Divine Punishment! Double damage! ✨");
+        System.out.println("[S] " + getName() + " uses S-rank skill: Divine Punishment! Double damage!");
     }
 }

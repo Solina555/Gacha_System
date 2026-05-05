@@ -1,5 +1,8 @@
 package Model;
 
+/**
+ * A-rank card with bonus stats and 1.5x special skill multiplier.
+ */
 public class ACard extends Card {
     private static final int BONUS_ATTACK = 20;
     private static final int BONUS_DEFENSE = 15;
@@ -14,6 +17,6 @@ public class ACard extends Card {
 
     @Override
     public void useSpecialSkill() {
-        System.out.println("⚡ " + getName() + " uses A-rank skill: Combo! 1.5x damage! ⚡");
+        System.out.println("[A] " + getName() + " uses A-rank skill: Combo! 1.5x damage!");
     }
 }
