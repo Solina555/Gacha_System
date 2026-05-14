@@ -19,10 +19,7 @@ public class GameUI {
         initGame();
     }
 
-    /**
-     * Initializes the game: welcome message, player name, 1000 starting coins.
-     * No free draw is given; player starts directly at main menu.
-     */
+    // Initializes the game: welcome message, player name, 1000 starting coins
     private void initGame() {
         System.out.println("========================================");
         System.out.println("      Welcome to Gacha Battle!");
@@ -39,9 +36,7 @@ public class GameUI {
         scanner.nextLine();
     }
 
-    /**
-     * Main game loop, displays main menu and processes choices.
-     */
+    // Main game loop, displays main menu and processes choices.
     public void start() {
         while (true) {
             showMainMenu();
@@ -69,9 +64,7 @@ public class GameUI {
         }
     }
 
-    /**
-     * Displays the main menu with player's current stats.
-     */
+    // Displays the main menu with player's current stats
     private void showMainMenu() {
         System.out.println("\n========================================");
         System.out.println("           [ MAIN MENU ]");
@@ -80,7 +73,9 @@ public class GameUI {
         System.out.println("[STAGE] Unlocked: 1 - " + player.getMaxUnlockedStage());
         System.out.println("[BAG] Cards in bag: " + player.getBagSize());
         System.out.print("[FIGHT] Team size: " + player.getTeam().size());
-        if (player.getTeam().isEmpty()) System.out.print(" (no team!)");
+        if (player.getTeam().isEmpty()) {
+            System.out.print(" (no team!)");
+        }
         System.out.println();
         System.out.println("========================================");
         System.out.println("1. Draw cards");
@@ -91,9 +86,7 @@ public class GameUI {
         System.out.println("========================================");
     }
 
-    /**
-     * Sub-menu for bag and team operations.
-     */
+    // Sub-menu for bag and team operations
     private void showBagAndTeamMenu() {
         while (true) {
             System.out.println("\n========== BAG & TEAM ==========");
@@ -126,24 +119,15 @@ public class GameUI {
     }
 
     /**
-     * Allows the player to select up to 3 cards from the bag to form the battle team.
-     * Cards are displayed sorted by rank (S > A > B) and insertion order.
+     * Allows the player to select up to 3 cards from the bag to form the battle team
+     * Cards are displayed sorted by rank (S > A > B) and insertion order
      */
     private void setupTeamFromBag() {
-        List<Card> bag = player.getBag();
-        if (bag.isEmpty()) {
+        List<Card> sorted = player.getSortedBag();
+        if (sorted.isEmpty()) {
             System.out.println("[X] No cards in bag. Draw some first.");
             return;
         }
-
-        // Sort cards for display: by rank (S > A > B), then by order in bag (oldest first)
-        List<Card> sorted = new ArrayList<>(bag);
-        sorted.sort((c1, c2) -> {
-            int order1 = getRankOrder(c1.getRank());
-            int order2 = getRankOrder(c2.getRank());
-            if (order1 != order2) return Integer.compare(order1, order2);
-            else return Integer.compare(bag.indexOf(c1), bag.indexOf(c2));
-        });
 
         System.out.println("\n===== SELECT YOUR TEAM (max 3 cards) =====");
         System.out.println("Available cards in bag (sorted by rank: S > A > B):");
@@ -167,10 +151,12 @@ public class GameUI {
                 int idx = Integer.parseInt(part) - 1;
                 if (idx >= 0 && idx < sorted.size()) {
                     chosenIndexes.add(idx);
-                } else {
+                }
+                else {
                     System.out.println("Invalid number: " + (idx+1) + " ignored.");
                 }
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e) {
                 System.out.println("Invalid input: " + part + " ignored.");
             }
         }
@@ -184,7 +170,8 @@ public class GameUI {
         for (int idx : chosenIndexes) {
             if (newTeam.size() < 3) {
                 newTeam.add(sorted.get(idx));
-            } else {
+            }
+            else {
                 System.out.println("Team already has 3 cards, remaining selections ignored.");
                 break;
             }
@@ -194,21 +181,7 @@ public class GameUI {
         player.showTeam();
     }
 
-    /**
-     * Helper to get numeric rank order (S=1, A=2, B=3) for sorting.
-     */
-    private int getRankOrder(String rank) {
-        switch (rank) {
-            case "S": return 1;
-            case "A": return 2;
-            case "B": return 3;
-            default: return 4;
-        }
-    }
-
-    /**
-     * Sub-menu for drawing cards (single or 10x).
-     */
+    // Sub-menu for drawing cards (single or 10x)
     private void showGachaMenu() {
         System.out.println("\n========== DRAW MENU ==========");
         System.out.println("1. Single draw (" + gachaService.getCostPerPull() + " coins)");
@@ -235,9 +208,7 @@ public class GameUI {
         scanner.nextLine();
     }
 
-    /**
-     * Allows the player to choose a stage to battle, showing unlock and reward status.
-     */
+    // Allows the player to choose a stage to battle, showing unlock and reward status.
     private void selectStageAndBattle() {
         if (player.getTeam().isEmpty()) {
             System.out.println("[WARN] Your team is empty! Please set a team first (Bag & Team -> Set team).");
@@ -253,9 +224,11 @@ public class GameUI {
             String status;
             if (i > player.getMaxUnlockedStage()) {
                 status = "[LOCKED] locked";
-            } else if (player.isFirstClear(i)) {
+            }
+            else if (player.isFirstClear(i)) {
                 status = "[REPEAT] repeatable (half reward)";
-            } else {
+            }
+            else {
                 status = "[FIRST] first clear (full reward)";
             }
             System.out.printf("%d. Stage %d - %s%n", i, i, status);
@@ -266,7 +239,8 @@ public class GameUI {
         int choice = getIntInput("");
         if (choice >= 1 && choice <= Player.getTotalStages()) {
             battleService.startBattle(choice);
-        } else if (choice != 0) {
+        }
+        else if (choice != 0) {
             System.out.println("Invalid choice!");
         }
 
@@ -275,9 +249,7 @@ public class GameUI {
         scanner.nextLine();
     }
 
-    /**
-     * Displays detailed player status: coins, stage progress, card count by rank, pity progress, and current team.
-     */
+    // Displays detailed player status: coins, stage progress, card count by rank, pity progress, and current team.
     private void showPlayerStatus() {
         System.out.println("\n========== PLAYER STATUS ==========");
         System.out.println("[PLAYER] Name: " + player.getName());
@@ -285,9 +257,22 @@ public class GameUI {
         System.out.println("[STAGE] Unlocked stages: 1 - " + player.getMaxUnlockedStage());
         System.out.println("[BAG] Cards in bag: " + player.getBagSize());
 
-        long sCount = player.getBag().stream().filter(c -> c.getRank().equals("S")).count();
-        long aCount = player.getBag().stream().filter(c -> c.getRank().equals("A")).count();
-        long bCount = player.getBag().stream().filter(c -> c.getRank().equals("B")).count();
+        // Count cards by rank
+        int sCount = 0;
+        int aCount = 0;
+        int bCount = 0;
+        for (Card c : player.getBag()) {
+            String rank = c.getRank();
+            if (rank.equals("S")) {
+                sCount++;
+            }
+            else if (rank.equals("A")) {
+                aCount++;
+            }
+            else if (rank.equals("B")) {
+                bCount++;
+            }
+        }
         System.out.println("\nCard count by rank:");
         System.out.println("  S-rank: " + sCount);
         System.out.println("  A-rank: " + aCount);
@@ -307,7 +292,7 @@ public class GameUI {
     }
 
     /**
-     * Safely reads an integer input from the user.
+     * Safely reads an integer input from the user
      * @param prompt Message to display before input
      * @return Valid integer entered by user
      */

@@ -3,9 +3,7 @@ package Service;
 import Model.*;
 import java.util.*;
 
-/**
- * Handles stage battles, enemy configuration, turn-based combat, and rewards.
- */
+// Handles stage battles, enemy configuration, turn-based combat, and rewards.
 public class BattleService {
     private Player player;
     private Random random;
@@ -25,7 +23,7 @@ public class BattleService {
     }
 
     /**
-     * Starts a battle for the given stage.
+     * Starts a battle for the given stage
      * @param stage Stage number (1-5)
      * @return true if player wins, false otherwise
      */
@@ -47,7 +45,8 @@ public class BattleService {
         System.out.println("Enemy: " + enemy);
         if (isFirst) {
             System.out.println("[FIRST] First clear reward: " + Player.getFullReward(stage) + " coins");
-        } else {
+        }
+        else {
             System.out.println("[REPEAT] Repeat clear reward: " + Player.getHalfReward(stage) + " coins (half of first clear)");
         }
         System.out.println("---------------------------------------------");
@@ -69,7 +68,8 @@ public class BattleService {
                 player.setFirstClear(stage);
                 player.unlockNextStage(stage);
                 System.out.println("[FIRST] First clear! Repeating this stage will give half reward.");
-            } else {
+            }
+            else {
                 System.out.println("[REPEAT] Stage cleared again. Half reward granted.");
             }
         }
@@ -78,7 +78,7 @@ public class BattleService {
     }
 
     /**
-     * Main turn-based battle loop.
+     * Main turn-based battle loop
      * @param team Player's current team (list is modified as cards die)
      * @param enemy Enemy instance
      * @return true if player wins, false if all cards are defeated
@@ -135,18 +135,14 @@ public class BattleService {
         return true;
     }
 
-    /**
-     * Player's normal attack.
-     */
+    // Player's normal attack
     private void playerAttack(Card card, Enemy enemy) {
         int damage = card.getAttack();
         System.out.println("\n" + card.getName() + " attacks!");
         enemy.takeDamage(damage);
     }
 
-    /**
-     * Player's special skill with rank-based multiplier.
-     */
+    // Player's special skill with rank-based multiplier
     private void useSpecialSkill(Card card, Enemy enemy) {
         card.useSpecialSkill();
         double multiplier;
@@ -160,36 +156,35 @@ public class BattleService {
         enemy.takeDamage(damage);
     }
 
-    /**
-     * Enemy attacks a random target in the player's team.
-     */
+    // Enemy attacks a random target in the player's team
     private void enemyAttack(List<Card> team, Enemy enemy) {
         Card target = team.get(random.nextInt(team.size()));
         System.out.println("\n" + enemy.getName() + " attacks " + target.getName() + "!");
         target.takeDamage(enemy.getAttack());
     }
 
-    /**
-     * Prints current HP status of all player's cards and the enemy.
-     */
+    // Prints current HP status of all player's cards and the enemy
     private void displayBattleStatus(List<Card> team, Enemy enemy) {
         System.out.println("\n===== BATTLE STATUS =====");
         System.out.print("Your team: ");
         if (team.isEmpty()) {
             System.out.print("(no cards alive)");
-        } else {
+        }
+        else {
             for (int i = 0; i < team.size(); i++) {
                 Card c = team.get(i);
                 System.out.print(c.getName() + " [HP:" + c.getHp() + "/" + c.getMaxHp() + "]");
-                if (i < team.size() - 1) System.out.print(", ");
+                if (i < team.size() - 1) {
+                    System.out.print(", ");
+                }
             }
         }
         System.out.println("\nEnemy: " + enemy.getName() + " [HP:" + enemy.getHp() + "/" + enemy.getMaxHp() + "]");
         System.out.println("========================");
     }
 
-    // ------------------------- Inner classes for enemy data -------------------------
 
+    // Inner classes for enemy data
     private static class EnemyConfig {
         String name;
         String rank;
@@ -229,12 +224,29 @@ public class BattleService {
             System.out.println(name + " takes " + actualDamage + " damage! HP left: " + hp);
         }
 
-        boolean isAlive() { return hp > 0; }
-        int getAttack() { return attack; }
-        String getName() { return name; }
-        int getHp() { return hp; }
-        int getMaxHp() { return maxHp; }
-        String getStatus() { return name + " [HP:" + hp + "/" + maxHp + "]"; }
+        boolean isAlive() {
+            return hp > 0;
+        }
+
+        int getAttack() {
+            return attack;
+        }
+
+        String getName() {
+            return name;
+        }
+
+        int getHp() {
+            return hp;
+        }
+
+        int getMaxHp() {
+            return maxHp;
+        }
+
+        String getStatus() {
+            return name + " [HP:" + hp + "/" + maxHp + "]";
+        }
 
         @Override
         public String toString() {

@@ -14,7 +14,7 @@ public abstract class Card {
     private int maxHp;
 
     /**
-     * Constructor for a card.
+     * Constructor for a card
      * @param name Card's name
      * @param rank Rank (S/A/B)
      * @param attack Base attack value
@@ -31,24 +31,34 @@ public abstract class Card {
     }
 
     // Getters
-    public String getName() { return name; }
-    public String getRank() { return rank; }
-    public int getAttack() { return attack; }
-    public int getDefense() { return defense; }
-    public int getHp() { return hp; }
-    public int getMaxHp() { return maxHp; }
+    public String getName() {
+        return name;
+    }
+    public String getRank() {
+        return rank;
+    }
+    public int getAttack() {
+        return attack;
+    }
+    public int getDefense() {
+        return defense;
+    }
+    public int getHp() {
+        return hp;
+    }
+    public int getMaxHp() {
+        return maxHp;
+    }
 
-    /**
-     * Sets HP with bounds [0, maxHp].
-     */
+    // Sets HP with bounds [0, maxHp]
     public void setHp(int hp) {
         this.hp = Math.max(0, Math.min(hp, maxHp));
     }
 
     /**
-     * Reduces HP by damage after applying defense reduction.
-     * Minimum damage is 1.
-     * @param damage Raw incoming damage
+     * Reduces HP by damage after applying defense reduction
+     * Minimum damage is 1
+     * @param damage = Raw incoming damage
      */
     public void takeDamage(int damage) {
         int actualDamage = Math.max(1, damage - defense);
@@ -64,22 +74,18 @@ public abstract class Card {
     }
 
     /**
-     * Abstract method to be implemented by subclasses.
-     * Prints a skill description and the damage multiplier logic is handled in battle.
+     * Abstract method to be implemented by subclasses
+     * Prints a skill description and the damage multiplier logic is handled in battle
      */
     public abstract void useSpecialSkill();
 
-    /**
-     * Displays card information in a formatted way.
-     */
+    // Displays card information in a formatted way
     public void displayInfo() {
-        System.out.printf("[%s] %s | ATK:%d DEF:%d HP:%d/%d\n",
-                rank, name, attack, defense, hp, maxHp);
+        System.out.printf("[%s] %s | ATK:%d DEF:%d HP:%d/%d\n", rank, name, attack, defense, hp, maxHp);
     }
 
     @Override
     public String toString() {
-        return String.format("[%s] %s (ATK:%d DEF:%d HP:%d/%d)",
-                rank, name, attack, defense, hp, maxHp);
+        return String.format("[%s] %s (ATK:%d DEF:%d HP:%d/%d)", rank, name, attack, defense, hp, maxHp);
     }
 }

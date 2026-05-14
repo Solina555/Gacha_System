@@ -2,9 +2,7 @@ package Model;
 
 import java.util.*;
 
-/**
- * Represents the player, holding bag (cards), battle team, coins, stage progress, etc.
- */
+// Represents the player, holding bag (cards), battle team, coins, stage progress, etc.
 public class Player {
     private String name;
     private List<Card> bag;               // All owned cards
@@ -25,17 +23,17 @@ public class Player {
         Arrays.fill(firstClear, false);
     }
 
-    // ======================= Team Management =======================
 
-    /**
-     * Returns a copy of the current battle team.
-     */
+    // ======================= Team Management ========================
+
+    // Returns a copy of the current battle team
     public List<Card> getTeam() {
         return new ArrayList<>(team);
     }
 
     /**
-     * Sets a new battle team from given cards. Validates that all cards are in bag and limits to 3.
+     * Sets a new battle team from given cards 
+     * Validates that all cards are in bag and limits to 3
      * @param newTeam List of cards to form the team
      */
     public void setTeam(List<Card> newTeam) {
@@ -58,8 +56,8 @@ public class Player {
     }
 
     /**
-     * Automatically sets the team to the first N cards in bag (N up to 3).
-     * Called after drawing cards if team is empty.
+     * Automatically sets the team to the first N cards in bag (N up to 3)
+     * Called after drawing cards if team is empty
      */
     public void autoSetupTeam() {
         if (bag.isEmpty()) {
@@ -71,11 +69,10 @@ public class Player {
         System.out.println("[AUTO] Team set to first " + size + " cards in bag.");
     }
 
-    // ======================= Bag Management =======================
 
-    /**
-     * Adds a card to the bag. If team is empty, auto-setup is triggered.
-     */
+    // ======================= Bag Management ========================
+
+    // Adds a card to the bag. If team is empty, auto-setup is triggered.
     public void addCard(Card card) {
         bag.add(card);
         System.out.println("[NEW] Card obtained: " + card);
@@ -84,30 +81,35 @@ public class Player {
         }
     }
 
-    /**
-     * Returns a copy of the bag.
-     */
+    // Returns a copy of the bag.
     public List<Card> getBag() {
         return new ArrayList<>(bag);
     }
 
-    /**
-     * Displays all cards in the bag, sorted by rank (S > A > B) and insertion order.
-     */
+    // Returns a sorted copy of the bag: by rank (S > A > B), then by insertion order (oldest first)
+    public List<Card> getSortedBag() {
+        List<Card> sorted = new ArrayList<>(bag);
+        sorted.sort((c1, c2) -> {
+            int order1 = getRankOrder(c1.getRank());
+            int order2 = getRankOrder(c2.getRank());
+            if (order1 != order2) {
+                return Integer.compare(order1, order2);
+            }
+            else {
+                return Integer.compare(bag.indexOf(c1), bag.indexOf(c2));
+            }
+        });
+        return sorted;
+    }
+
+    // Displays all cards in the bag, sorted by rank (S > A > B) and insertion order.
     public void showBag() {
         if (bag.isEmpty()) {
             System.out.println("[BAG] Your bag is empty! Go draw some cards.");
             return;
         }
 
-        // Sort by rank (S > A > B) then by order in bag (oldest first)
-        List<Card> sorted = new ArrayList<>(bag);
-        sorted.sort((c1, c2) -> {
-            int order1 = getRankOrder(c1.getRank());
-            int order2 = getRankOrder(c2.getRank());
-            if (order1 != order2) return Integer.compare(order1, order2);
-            else return Integer.compare(bag.indexOf(c1), bag.indexOf(c2));
-        });
+        List<Card> sorted = getSortedBag();
 
         System.out.println("\n========== MY BAG ==========");
         System.out.println("Total cards: " + bag.size());
@@ -124,9 +126,7 @@ public class Player {
         System.out.println("============================\n");
     }
 
-    /**
-     * Helper to get numeric order for rank comparison.
-     */
+    // Helper to get numeric order for rank comparison
     private int getRankOrder(String rank) {
         switch (rank) {
             case "S": return 1;
@@ -136,9 +136,7 @@ public class Player {
         }
     }
 
-    /**
-     * Displays the current battle team.
-     */
+    // Displays the current battle team
     public void showTeam() {
         if (team.isEmpty()) {
             System.out.println("[FIGHT] No cards in your team! Please set a team first.");
@@ -152,28 +150,23 @@ public class Player {
         System.out.println("================================\n");
     }
 
+
     // ======================= Stage & Reward Management =======================
 
-    /**
-     * Checks if a stage has been cleared for the first time (full reward already given).
-     */
+    // Checks if a stage has been cleared for the first time (if full reward already given)
     public boolean isFirstClear(int stage) {
         if (stage < 1 || stage > TOTAL_STAGES) return false;
         return firstClear[stage];
     }
 
-    /**
-     * Marks a stage as first cleared.
-     */
+    // Marks a stage as first cleared
     public void setFirstClear(int stage) {
         if (stage >= 1 && stage <= TOTAL_STAGES) {
             firstClear[stage] = true;
         }
     }
 
-    /**
-     * Unlocks the next stage if the current stage is the highest unlocked.
-     */
+    // Unlocks the next stage if the current stage is the highest unlocked
     public void unlockNextStage(int stage) {
         if (stage == maxUnlockedStage && stage < TOTAL_STAGES) {
             maxUnlockedStage = stage + 1;
@@ -181,23 +174,38 @@ public class Player {
         }
     }
 
-    public int getMaxUnlockedStage() { return maxUnlockedStage; }
-    public static int getTotalStages() { return TOTAL_STAGES; }
+    public int getMaxUnlockedStage() {
+        return maxUnlockedStage;
+    }
 
-    /**
-     * Full reward for a stage: stage number * 100.
-     */
-    public static int getFullReward(int stage) { return stage * 100; }
+    public static int getTotalStages() {
+        return TOTAL_STAGES;
+    }
 
-    /**
-     * Half reward for a stage (when repeated).
-     */
-    public static int getHalfReward(int stage) { return getFullReward(stage) / 2; }
+    // Full reward for a stage: stage number * 100
+    public static int getFullReward(int stage) {
+        return stage * 100;
+    }
+
+    // Half reward for a stage (when repeated)
+    public static int getHalfReward(int stage) {
+        return getFullReward(stage) / 2;
+    }
+
 
     // ======================= General Getters & Setters =======================
-    public String getName() { return name; }
-    public int getCoins() { return coins; }
-    public void addCoins(int amount) { this.coins += amount; }
+    public String getName() {
+        return name;
+    }
+
+    public int getCoins() {
+        return coins;
+    }
+
+    public void addCoins(int amount) {
+        this.coins += amount;
+    }
+
     public boolean spendCoins(int amount) {
         if (coins >= amount) {
             coins -= amount;
@@ -205,5 +213,8 @@ public class Player {
         }
         return false;
     }
-    public int getBagSize() { return bag.size(); }
+
+    public int getBagSize() {
+        return bag.size();
+    }
 }

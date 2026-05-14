@@ -1,8 +1,7 @@
 package Model;
 
-/**
- * B-rank card with no bonus stats and 1.2x special skill multiplier.
- */
+// B-rank card with no bonus stats and 1.2x special skill multiplier
+
 public class BCard extends Card {
     public BCard(String name, int baseAttack, int baseDefense, int baseHp) {
         super(name, "B", baseAttack, baseDefense, baseHp);
